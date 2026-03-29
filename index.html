@@ -1,408 +1,452 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" data-color="red">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Платформа (by StreamLiveTV)</title>
-    <!-- Google Fonts & Icons -->
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+    <title>Казанский Форум 2026 — Инновации и Инвестиции</title>
     <style>
+        /* FONTS & RESET */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
+
         :root {
-            --bg-color: #0f0f0f;
-            --text-color: #ffffff;
-            --text-secondary: #aaa;
-            --hover-color: #272727;
-            --accent-color: #ff0000;
-            --header-bg: rgba(15, 15, 15, 0.95);
-            --sidebar-width: 240px;
+            --bg-dark: #0a0e17;
+            --bg-card: #161c2d;
+            --accent-neon: #00f2ff;
+            --text-main: #ffffff;
+            --text-dim: #a0a6b5;
+            --transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
         }
 
-        [data-theme="light"] {
-            --bg-color: #ffffff;
-            --text-color: #0f0f0f;
-            --text-secondary: #606060;
-            --hover-color: #f2f2f2;
-            --header-bg: rgba(255, 255, 255, 0.95);
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
-        [data-color="blue"] { --accent-color: #3ea6ff; }
-        [data-color="green"] { --accent-color: #2ba640; }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Roboto', sans-serif; }
-
-        body { background-color: var(--bg-color); color: var(--text-color); overflow-x: hidden; }
-
-        /* Header */
-        header {
-            position: fixed; top: 0; left: 0; right: 0; height: 56px;
-            background: var(--header-bg); display: flex; align-items: center;
-            justify-content: space-between; padding: 0 16px; z-index: 1000;
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            line-height: 1.6;
+            overflow-x: hidden;
         }
 
-        .header-left { display: flex; align-items: center; gap: 16px; }
-        .logo { font-weight: bold; font-size: 18px; cursor: pointer; display: flex; align-items: center; gap: 4px; }
-        .logo span { color: var(--accent-color); font-size: 12px; font-weight: normal; }
-
-        .search-container { flex: 0 1 720px; display: flex; align-items: center; }
-        .search-bar {
-            width: 100%; display: flex; background: #121212;
-            border: 1px solid #333; border-radius: 40px 0 0 40px; padding: 0 16px;
-        }
-        [data-theme="light"] .search-bar { background: #fff; border: 1px solid #ccc; }
-        .search-bar input {
-            width: 100%; height: 40px; background: transparent; border: none;
-            color: var(--text-color); outline: none; font-size: 16px;
-        }
-        .search-btn {
-            background: #222; border: 1px solid #333; border-left: none;
-            padding: 0 20px; height: 40px; border-radius: 0 40px 40px 0; cursor: pointer;
-        }
-        [data-theme="light"] .search-btn { background: #f8f8f8; border: 1px solid #ccc; }
-
-        /* Sidebar */
-        aside {
-            position: fixed; top: 56px; left: 0; width: var(--sidebar-width);
-            height: calc(100vh - 56px); padding: 12px; overflow-y: auto;
-        }
-        .nav-item {
-            display: flex; align-items: center; gap: 24px; padding: 10px 12px;
-            border-radius: 10px; cursor: pointer; transition: 0.2s; text-decoration: none; color: inherit;
-        }
-        .nav-item:hover, .nav-item.active { background: var(--hover-color); }
-        .nav-item i { font-size: 24px; }
-
-        /* Content Area */
-        main { margin-top: 56px; margin-left: var(--sidebar-width); padding: 24px; min-height: 100vh; }
-
-        /* Grid */
-        .video-grid {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 16px; row-gap: 40px;
+        /* UTILS */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
         }
 
-        .video-card { cursor: pointer; }
-        .thumbnail {
-            width: 100%; aspect-ratio: 16/9; border-radius: 12px;
-            background: #333; overflow: hidden; position: relative;
-        }
-        .thumbnail img { width: 100%; height: 100%; object-fit: cover; }
-        .video-info { display: flex; gap: 12px; margin-top: 12px; }
-        .channel-icon { width: 36px; height: 36px; border-radius: 50%; background: #444; flex-shrink: 0; }
-        .details h3 { font-size: 16px; margin-bottom: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        .details p { color: var(--text-secondary); font-size: 14px; }
-
-        /* Watch Page */
-        .watch-container { display: grid; grid-template-columns: 1fr 400px; gap: 24px; }
-        .player-box { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 12px; overflow: hidden; }
-        .player-box iframe { width: 100%; height: 100%; border: none; }
-        .video-meta { margin-top: 16px; }
-        .side-recs { display: flex; flex-direction: column; gap: 12px; }
-        .rec-card { display: flex; gap: 8px; cursor: pointer; }
-        .rec-thumb { width: 168px; aspect-ratio: 16/9; border-radius: 8px; flex-shrink: 0; background: #333; }
-        .rec-details h4 { font-size: 14px; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-
-        /* Settings Modal */
-        #settings-modal {
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: var(--bg-color); border: 1px solid #333; padding: 24px;
-            border-radius: 12px; z-index: 2000; display: none; min-width: 300px;
-        }
-        .modal-overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1050; display: none;
+        section {
+            padding: 100px 0;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: var(--transition);
         }
 
-        /* Mobile */
-        .mobile-nav {
-            position: fixed; bottom: 0; left: 0; right: 0; height: 50px;
-            background: var(--bg-color); border-top: 1px solid #333;
-            display: none; justify-content: space-around; align-items: center; z-index: 1000;
+        section.visible {
+            opacity: 1;
+            transform: translateY(0);
         }
 
-        @media (max-width: 1000px) {
-            .watch-container { grid-template-columns: 1fr; }
-            aside { display: none; }
-            main { margin-left: 0; }
-            .mobile-nav { display: flex; }
-            .search-container { flex: 1; margin: 0 10px; }
+        .btn {
+            display: inline-block;
+            padding: 15px 35px;
+            background: var(--accent-neon);
+            color: var(--bg-dark);
+            text-decoration: none;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-radius: 4px;
+            transition: var(--transition);
+            border: none;
+            cursor: pointer;
         }
 
-        .hidden { display: none; }
+        .btn:hover {
+            box-shadow: 0 0 20px rgba(0, 242, 255, 0.6);
+            transform: translateY(-2px);
+        }
+
+        h2 {
+            font-size: 2.5rem;
+            margin-bottom: 40px;
+            text-transform: uppercase;
+            border-left: 4px solid var(--accent-neon);
+            padding-left: 20px;
+        }
+
+        /* HERO SECTION */
+        .hero {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            background: radial-gradient(circle at center, #1a233a 0%, #0a0e17 100%);
+            position: relative;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,<svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><rect width="1" height="1" fill="rgba(255,255,255,0.05)"/></svg>');
+        }
+
+        .hero-content h1 {
+            font-size: 5rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+            line-height: 1.1;
+        }
+
+        .hero-content span {
+            color: var(--accent-neon);
+        }
+
+        .hero-info {
+            font-size: 1.5rem;
+            margin-bottom: 40px;
+            color: var(--text-dim);
+        }
+
+        /* ABOUT */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+        }
+
+        /* TOPICS */
+        .topics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .topic-card {
+            background: var(--bg-card);
+            padding: 30px;
+            border-bottom: 3px solid transparent;
+            transition: var(--transition);
+        }
+
+        .topic-card:hover {
+            border-color: var(--accent-neon);
+            background: #1e263d;
+        }
+
+        /* SPEAKERS */
+        .speakers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+        }
+
+        .speaker-card {
+            background: var(--bg-card);
+            padding: 40px 20px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .speaker-card .avatar-stub {
+            width: 80px;
+            height: 80px;
+            background: #2a344a;
+            margin: 0 auto 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-neon);
+            font-weight: bold;
+        }
+
+        /* PROGRAM */
+        .schedule {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .schedule tr {
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .schedule td {
+            padding: 25px 15px;
+        }
+
+        .time {
+            color: var(--accent-neon);
+            font-weight: 600;
+            width: 150px;
+        }
+
+        .event-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        /* FORM */
+        .reg-form {
+            background: var(--bg-card);
+            padding: 50px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        input {
+            width: 100%;
+            padding: 15px;
+            background: #0a0e17;
+            border: 1px solid #2a344a;
+            color: white;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: var(--accent-neon);
+        }
+
+        /* FOOTER */
+        footer {
+            background: #05070a;
+            padding: 60px 0;
+            border-top: 1px solid #161c2d;
+            text-align: center;
+        }
+
+        .footer-links {
+            margin: 20px 0;
+        }
+
+        .footer-links a {
+            color: var(--text-dim);
+            margin: 0 15px;
+            text-decoration: none;
+        }
+
+        .partners-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            color: var(--text-dim);
+            font-weight: 600;
+            justify-content: center;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .hero-content h1 { font-size: 3rem; }
+            .grid-2 { grid-template-columns: 1fr; }
+            h2 { font-size: 2rem; }
+        }
     </style>
 </head>
 <body>
 
-<header>
-    <div class="header-left">
-        <div class="logo" onclick="app.navigate('home')">Платформа <span>by StreamLiveTV</span></div>
-    </div>
-    <div class="search-container">
-        <div class="search-bar">
-            <input type="text" id="search-input" placeholder="Введите запрос">
+    <!-- Hero Section -->
+    <header class="hero">
+        <div class="container hero-content">
+            <h1>КАЗАНСКИЙ<br><span>ФОРУМ 2026</span></h1>
+            <p class="hero-info">10 Апреля 2026 • Казань • ИТ-Парк им. Башира Рамеева</p>
+            <a href="#register" class="btn">Регистрация</a>
         </div>
-        <button class="search-btn" onclick="app.search()"><i class="material-icons-outlined">search</i></button>
-    </div>
-    <div class="header-right">
-        <button class="nav-item" onclick="app.toggleSettings()" style="padding: 8px;"><i class="material-icons-outlined">settings</i></button>
-    </div>
-</header>
+    </header>
 
-<aside id="desktop-sidebar">
-    <div class="nav-item active" onclick="app.navigate('home')"><i class="material-icons-outlined">home</i> Главная</div>
-    <div class="nav-item"><i class="material-icons-outlined">explore</i> Тренды</div>
-    <div class="nav-item"><i class="material-icons-outlined">subscriptions</i> Подписки</div>
-    <hr style="margin: 12px 0; border: 0; border-top: 1px solid #333;">
-    <div class="nav-item"><i class="material-icons-outlined">video_library</i> Библиотека</div>
-</aside>
+    <!-- About Section -->
+    <section id="about" class="container">
+        <div class="grid-2">
+            <div>
+                <h2>О событии</h2>
+                <p>Казанский Форум 2026 — это эпицентр технологического прогресса, где встречаются лидеры индустрии, инвесторы и стартап-сообщества. Мы создаем пространство для прямого диалога и заключения стратегических партнерств в самом сердце инновационного региона России.</p>
+            </div>
+            <div style="background: var(--bg-card); padding: 40px; border-left: 2px solid var(--accent-neon);">
+                <h4 style="margin-bottom: 15px; color: var(--accent-neon);">Аудитория:</h4>
+                <ul style="list-style: none;">
+                    <li>— Технологические предприниматели</li>
+                    <li>— Представители венчурных фондов</li>
+                    <li>— Руководители цифровых департаментов</li>
+                    <li>— Государственный сектор и институты развития</li>
+                </ul>
+            </div>
+        </div>
+    </section>
 
-<main id="app-content">
-    <!-- Content injected here -->
-</main>
-
-<nav class="mobile-nav">
-    <div onclick="app.navigate('home')"><i class="material-icons-outlined">home</i></div>
-    <div onclick="document.getElementById('search-input').focus()"><i class="material-icons-outlined">search</i></div>
-    <div><i class="material-icons-outlined">subscriptions</i></div>
-    <div onclick="app.toggleSettings()"><i class="material-icons-outlined">settings</i></div>
-</nav>
-
-<div class="modal-overlay" id="overlay" onclick="app.toggleSettings()"></div>
-<div id="settings-modal">
-    <h3>Настройки</h3>
-    <div style="margin: 20px 0;">
-        <p>Тема:</p>
-        <button onclick="app.setTheme('dark')">Темная</button>
-        <button onclick="app.setTheme('light')">Светлая</button>
-    </div>
-    <div style="margin: 20px 0;">
-        <p>Цвет акцента:</p>
-        <button onclick="app.setColor('red')">Красный</button>
-        <button onclick="app.setColor('blue')">Синий</button>
-        <button onclick="app.setColor('green')">Зеленый</button>
-    </div>
-    <button onclick="app.toggleSettings()">Закрыть</button>
-</div>
-
-<script>
-/** 
- * RECOMMENDATION ALGORITHM 
- * Использует localStorage для хранения истории и весов каналов.
- */
-const RecEngine = {
-    historyKey: 'plt_history',
-    statsKey: 'plt_stats',
-
-    logView(videoId, channelId) {
-        let history = JSON.parse(localStorage.getItem(this.historyKey) || '[]');
-        if (!history.includes(videoId)) {
-            history.push(videoId);
-            if (history.length > 100) history.shift();
-            localStorage.setItem(this.historyKey, JSON.stringify(history));
-        }
-
-        let stats = JSON.parse(localStorage.getItem(this.statsKey) || '{}');
-        stats[channelId] = (stats[channelId] || 0) + 1;
-        localStorage.setItem(this.statsKey, JSON.stringify(stats));
-    },
-
-    rankVideos(videos) {
-        const stats = JSON.parse(localStorage.getItem(this.statsKey) || '{}');
-        const history = JSON.parse(localStorage.getItem(this.historyKey) || '[]');
-
-        return videos.map(v => {
-            let score = 0;
-            // Вес за популярность канала у пользователя
-            if (stats[v.channel_id]) score += stats[v.channel_id] * 10;
-            // Понижение если уже смотрел
-            if (history.includes(v.id)) score -= 50;
-            // Рандом для свежести
-            score += Math.random() * 5;
-            return { ...v, _score: score };
-        }).sort((a, b) => b._score - a._score);
-    }
-};
-
-/** 
- * MAIN APP LOGIC
- */
-const app = {
-    allVideos: [],
-    filteredVideos: [],
-    allowedChannels: ['oinktech', 'twixoff', 'ТВКАНАЛЫ'],
-    apis: {
-        channels: 'https://aqeleulwobgamdffkfri.supabase.co/functions/v1/public-channels',
-        extra: 'https://embesslivestudio.vercel.app/'
-    },
-
-    async init() {
-        this.loadSettings();
-        await this.fetchData();
-        this.navigate('home');
-    },
-
-    async fetchData() {
-        try {
-            const resp = await fetch(this.apis.channels);
-            const data = await resp.json();
-            
-            // Фильтрация каналов
-            this.allVideos = data.filter(v => 
-                this.allowedChannels.includes(v.channel_id) || 
-                this.allowedChannels.includes(v.channel_name)
-            );
-            this.filteredVideos = [...this.allVideos];
-        } catch (e) {
-            console.error("API Error", e);
-        }
-    },
-
-    renderHome() {
-        const ranked = RecEngine.rankVideos(this.filteredVideos);
-        let html = `<div class="video-grid">`;
-        ranked.forEach(v => {
-            html += `
-                <div class="video-card" onclick="app.viewVideo('${v.id}')">
-                    <div class="thumbnail">
-                        <img src="${v.thumbnail_url || 'https://via.placeholder.com/320x180?text=No+Preview'}" loading="lazy">
-                    </div>
-                    <div class="video-info">
-                        <div class="channel-icon"></div>
-                        <div class="details">
-                            <h3>${v.title || 'Без названия'}</h3>
-                            <p>${v.channel_id}</p>
-                            <p>${v.views || 0} просмотров</p>
-                        </div>
-                    </div>
+    <!-- Topics Section -->
+    <section id="topics">
+        <div class="container">
+            <h2>Ключевые темы</h2>
+            <div class="topics-grid">
+                <div class="topic-card">
+                    <h3>Инновации</h3>
+                    <p>Прорывные технологии и их влияние на реальный сектор экономики.</p>
                 </div>
-            `;
+                <div class="topic-card">
+                    <h3>Инвестиции</h3>
+                    <p>Новые стратегии венчурного капитала в современных условиях.</p>
+                </div>
+                <div class="topic-card">
+                    <h3>Предпринимательство</h3>
+                    <p>Масштабирование технологических проектов на глобальном рынке.</p>
+                </div>
+                <div class="topic-card">
+                    <h3>Цифровая экономика</h3>
+                    <p>Будущее блокчейна, ИИ и больших данных в управлении.</p>
+                </div>
+                <div class="topic-card">
+                    <h3>Регионы</h3>
+                    <p>Развитие экосистем и технопарков за пределами столиц.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Speakers Section -->
+    <section id="speakers" class="container">
+        <h2>Спикеры</h2>
+        <div class="speakers-grid">
+            <div class="speaker-card">
+                <div class="avatar-stub">АМ</div>
+                <h4>Алексей Морозов</h4>
+                <p style="color: var(--text-dim); font-size: 0.9rem;">Директор по инновациям, TechCorp</p>
+            </div>
+            <div class="speaker-card">
+                <div class="avatar-stub">ЕВ</div>
+                <h4>Елена Волкова</h4>
+                <p style="color: var(--text-dim); font-size: 0.9rem;">Управляющий партнер, Global Venture</p>
+            </div>
+            <div class="speaker-card">
+                <div class="avatar-stub">РИ</div>
+                <h4>Руслан Ибрагимов</h4>
+                <p style="color: var(--text-dim); font-size: 0.9rem;">Основатель платформы "Цифра-Р"</p>
+            </div>
+            <div class="speaker-card">
+                <div class="avatar-stub">МС</div>
+                <h4>Марина Соколова</h4>
+                <p style="color: var(--text-dim); font-size: 0.9rem;">Эксперт в области ИИ и Big Data</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Program Section -->
+    <section id="program">
+        <div class="container">
+            <h2>Программа дня</h2>
+            <table class="schedule">
+                <tr>
+                    <td class="time">09:00 — 10:00</td>
+                    <td>
+                        <div class="event-title">Регистрация и утренний кофе</div>
+                        <div style="color: var(--text-dim);">Холл главного зала</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="time">10:00 — 11:30</td>
+                    <td>
+                        <div class="event-title">Пленарная сессия: Будущее ИТ в 2026 году</div>
+                        <div style="color: var(--text-dim);">Главный зал, Сектор А</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="time">12:00 — 14:00</td>
+                    <td>
+                        <div class="event-title">Инвестиционная панель: Где искать капитал?</div>
+                        <div style="color: var(--text-dim);">Зал Б1</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="time">15:00 — 17:00</td>
+                    <td>
+                        <div class="event-title">Питч-сессия лучших стартапов Поволжья</div>
+                        <div style="color: var(--text-dim);">Демо-зона</div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </section>
+
+    <!-- Partners Section -->
+    <section id="partners" class="container">
+        <h2 style="border: none; text-align: center; padding: 0;">Партнёры</h2>
+        <div class="partners-list">
+            <span>РОСТЕХНО</span>
+            <span>ТАТ-ИНВЕСТ</span>
+            <span>ЦИФРОВОЙ ТАТАРСТАН</span>
+            <span>ВЕНЧУР-ЛАБ</span>
+            <span>БАНК КАЗАНИ</span>
+            <span>IT-PARK</span>
+        </div>
+    </section>
+
+    <!-- Registration Section -->
+    <section id="register">
+        <div class="container">
+            <div class="reg-form">
+                <h2 style="border: none; padding: 0; text-align: center; margin-bottom: 20px;">Участие</h2>
+                <form id="contactForm" onsubmit="return false;">
+                    <div class="form-group">
+                        <input type="text" placeholder="Ваше имя" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="email" placeholder="Электронная почта" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" placeholder="Компания / Должность">
+                    </div>
+                    <button type="submit" class="btn" style="width: 100%;">Отправить заявку</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>Казань, ул. Спартаковская, 2 (ИТ-Парк им. Б. Рамеева)</p>
+            <div class="footer-links">
+                <a href="#">Telegram</a>
+                <a href="#">VKontakte</a>
+                <a href="#">Email</a>
+            </div>
+            <p style="color: var(--text-dim); font-size: 0.8rem;">&copy; 2026 Казанский Технологический Форум. Все права защищены.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Анимация появления секций при скролле
+        const observerOptions = {
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('section').forEach(section => {
+            observer.observe(section);
         });
-        html += `</div>`;
-        document.getElementById('app-content').innerHTML = html;
-    },
 
-    viewVideo(id) {
-        const video = this.allVideos.find(v => v.id == id);
-        if (!video) return;
-
-        RecEngine.logView(video.id, video.channel_id);
-        
-        const recommendations = RecEngine.rankVideos(
-            this.allVideos.filter(v => v.id != id)
-        ).slice(0, 10);
-
-        let recHtml = '';
-        recommendations.forEach(r => {
-            recHtml += `
-                <div class="rec-card" onclick="app.viewVideo('${r.id}')">
-                    <div class="rec-thumb"><img src="${r.thumbnail_url}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;"></div>
-                    <div class="rec-details">
-                        <h4>${r.title}</h4>
-                        <p style="font-size:12px;color:var(--text-secondary);margin-top:4px;">${r.channel_id}</p>
-                    </div>
-                </div>
-            `;
+        // Плавный скролл для кнопок
+        document.querySelector('.btn').addEventListener('click', function(e) {
+            e.preventDefault();
+            const target = document.querySelector('#register');
+            target.scrollIntoView({ behavior: 'smooth' });
         });
-
-        const html = `
-            <div class="watch-container">
-                <div class="main-video">
-                    <div class="player-box">
-                        <iframe src="https://embesslivestudio.lovable.app/?v=${video.id}" allowfullscreen></iframe>
-                    </div>
-                    <div class="video-meta">
-                        <h2>${video.title}</h2>
-                        <div style="display:flex;align-items:center;gap:12px;margin-top:12px;padding-bottom:12px;border-bottom:1px solid #333;">
-                            <div class="channel-icon" onclick="app.viewChannel('${video.channel_id}')" style="cursor:pointer"></div>
-                            <div>
-                                <strong onclick="app.viewChannel('${video.channel_id}')" style="cursor:pointer">${video.channel_id}</strong>
-                            </div>
-                        </div>
-                        <p style="margin-top:12px; font-size:14px;">${video.description || 'Описание отсутствует'}</p>
-                    </div>
-                </div>
-                <div class="side-recs">
-                    ${recHtml}
-                </div>
-            </div>
-        `;
-        document.getElementById('app-content').innerHTML = html;
-        window.scrollTo(0,0);
-    },
-
-    viewChannel(channelId) {
-        const channelVideos = this.allVideos.filter(v => v.channel_id === channelId);
-        const html = `
-            <div class="channel-header" style="margin-bottom:24px;">
-                <div style="height:200px; background:#333; border-radius:12px; margin-bottom:16px;"></div>
-                <div style="display:flex; align-items:center; gap:20px;">
-                    <div class="channel-icon" style="width:80px; height:80px;"></div>
-                    <h1>${channelId}</h1>
-                </div>
-                <div style="margin-top:20px; border-bottom:1px solid #333; display:flex; gap:24px; padding-bottom:10px;">
-                    <strong>ВИДЕО</strong>
-                    <span style="color:var(--text-secondary)">О КАНАЛЕ</span>
-                </div>
-            </div>
-            <div class="video-grid">
-                ${channelVideos.map(v => `
-                    <div class="video-card" onclick="app.viewVideo('${v.id}')">
-                        <div class="thumbnail"><img src="${v.thumbnail_url}"></div>
-                        <div class="video-info">
-                            <div class="details">
-                                <h3>${v.title}</h3>
-                                <p>${v.views} просмотров</p>
-                            </div>
-                        </div>
-                    </div>
-                `).join('')}
-            </div>
-        `;
-        document.getElementById('app-content').innerHTML = html;
-    },
-
-    search() {
-        const query = document.getElementById('search-input').value.toLowerCase();
-        this.filteredVideos = this.allVideos.filter(v => 
-            v.title.toLowerCase().includes(query) || 
-            v.channel_id.toLowerCase().includes(query)
-        );
-        this.renderHome();
-    },
-
-    navigate(page) {
-        if (page === 'home') {
-            this.filteredVideos = [...this.allVideos];
-            this.renderHome();
-        }
-    },
-
-    toggleSettings() {
-        const m = document.getElementById('settings-modal');
-        const o = document.getElementById('overlay');
-        const isVisible = m.style.display === 'block';
-        m.style.display = isVisible ? 'none' : 'block';
-        o.style.display = isVisible ? 'none' : 'block';
-    },
-
-    setTheme(theme) {
-        document.documentElement.setAttribute('data-theme', theme);
-        localStorage.setItem('plt_theme', theme);
-    },
-
-    setColor(color) {
-        document.documentElement.setAttribute('data-color', color);
-        localStorage.setItem('plt_color', color);
-    },
-
-    loadSettings() {
-        const t = localStorage.getItem('plt_theme') || 'dark';
-        const c = localStorage.getItem('plt_color') || 'red';
-        this.setTheme(t);
-        this.setColor(c);
-    }
-};
-
-document.addEventListener('DOMContentLoaded', () => app.init());
-</script>
+    </script>
 </body>
 </html>
