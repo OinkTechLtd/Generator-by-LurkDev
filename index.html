@@ -1,209 +1,143 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Платформа (by StreamLiveTV)</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        :root {
-            --bg-color: #0f0f0f;
-            --text-color: #ffffff;
-            --secondary-bg: #272727;
-            --accent-color: #ff0000;
-        }
-
-        [data-theme="light"] {
-            --bg-color: #ffffff;
-            --text-color: #0f0f0f;
-            --secondary-bg: #f2f2f2;
-        }
-
-        body {
-            margin: 0;
-            font-family: 'Roboto', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            transition: background 0.3s;
-        }
-
-        /* Header */
-        header {
-            position: fixed;
-            top: 0;
-            width: 100%;
-            height: 56px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: var(--bg-color);
-            padding: 0 16px;
-            z-index: 1000;
-        }
-
-        .logo { font-weight: bold; font-size: 20px; color: var(--accent-color); text-decoration: none; }
-
-        /* Feed Grid */
-        #feed {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 16px;
-            padding: 70px 16px 80px 16px;
-        }
-
-        .video-card { cursor: pointer; }
-        .thumbnail { 
-            width: 100%; aspect-ratio: 16/9; 
-            background: var(--secondary-bg); 
-            border-radius: 12px;
-            object-fit: cover;
-        }
-
-        /* Mobile Nav */
-        .mobile-nav {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            height: 60px;
-            background: var(--bg-color);
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            border-top: 1px solid var(--secondary-bg);
-            z-index: 1000;
-        }
-
-        .nav-item { text-align: center; font-size: 10px; color: var(--text-color); text-decoration: none; }
-        .nav-item i { font-size: 20px; display: block; }
-
-        /* Player Overlay */
-        #player-container {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; z-index: 2000;
-        }
-        
-        iframe { width: 100%; height: 100%; border: none; }
-
-        .close-player {
-            position: absolute; top: 10px; right: 10px;
-            color: white; font-size: 30px; cursor: pointer; z-index: 2001;
-        }
-
-        .settings-panel { padding: 20px; display: none; }
-        .active { display: block !important; }
-    </style>
+    <title>Смотрим | YouTube 2026</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div class="player-container" id="player">
+        <video id="main-video" src=""></video>
+        
+        <div class="controls">
+            <div class="progress-area"><div class="progress-bar"></div></div>
+            <div class="buttons">
+                <button id="play-pause">Play</button>
+                <div class="brand">СМОТРИМ 2026</div>
+                <div class="time">00:00 / 00:00</div>
+            </div>
+        </div>
 
-<header>
-    <a href="#" class="logo">Платформа</a>
-    <div id="user-profile" onclick="toggleSettings()"><i class="fas fa-user-circle fa-2x"></i></div>
-</header>
-
-<div id="feed">
-    <!-- Контент загружается через JS -->
-</div>
-
-<div id="settings" class="settings-panel">
-    <h2>Настройки</h2>
-    <label>Тема оформления:</label>
-    <select onchange="changeTheme(this.value)">
-        <option value="dark">Темная</option>
-        <option value="light">Светлая</option>
-    </select>
-</div>
-
-<nav class="mobile-nav">
-    <a href="#" class="nav-item" onclick="loadHome()"><i class="fas fa-home"></i>Главная</a>
-    <a href="#" class="nav-item"><i class="fas fa-compass"></i>Навигатор</a>
-    <a href="#" class="nav-item"><i class="fas fa-play-circle"></i>Shorts</a>
-    <a href="#" class="nav-item"><i class="fas fa-folder"></i>Библиотека</a>
-</nav>
-
-<div id="player-container">
-    <span class="close-player" onclick="closePlayer()">&times;</span>
-    <div id="video-frame"></div>
-</div>
-
-<script>
-    const API_URL = 'https://aqeleulwobgamdffkfri.supabase.co/functions/v1/public-channels';
-    const EMBED_BASE = 'https://embesslivestudio.lovable.app/embed/'; // Заданный домейн
-    const WHITELIST = ['oinktech', 'twixoff', 'ТВКАНАЛЫ'];
-
-    let userPreferences = JSON.parse(localStorage.getItem('prefs')) || {};
-
-    // Загрузка данных
-    async function fetchVideos() {
-        try {
-            const response = await fetch(API_URL);
-            const data = await response.json();
-            
-            // Фильтрация мусора (Только оригинал)
-            const filtered = data.filter(channel => 
-                WHITELIST.includes(channel.name) || channel.is_verified === true
-            );
-
-            // Сортировка по рекомендациям (упрощенно)
-            filtered.sort((a, b) => (userPreferences[b.category] || 0) - (userPreferences[a.category] || 0));
-
-            renderFeed(filtered);
-        } catch (e) {
-            console.error("Ошибка загрузки:", e);
-        }
-    }
-
-    function renderFeed(channels) {
-        const container = document.getElementById('feed');
-        container.innerHTML = '';
-        channels.forEach(ch => {
-            const card = document.createElement('div');
-            card.className = 'video-card';
-            card.onclick = () => openVideo(ch.id, ch.category);
-            card.innerHTML = `
-                <img class="thumbnail" src="${ch.thumbnail || 'https://via.placeholder.com/300x169'}">
-                <div style="padding:10px 0;">
-                    <strong style="display:block;">${ch.title || 'Прямой эфир'}</strong>
-                    <small style="color:gray;">${ch.name} • Проверено</small>
-                </div>
-            `;
-            container.appendChild(card);
-        });
-    }
-
-    function openVideo(id, category) {
-        // Трекинг рекомендаций
-        userPreferences[category] = (userPreferences[category] || 0) + 1;
-        localStorage.setItem('prefs', JSON.stringify(userPreferences));
-
-        const player = document.getElementById('player-container');
-        const frame = document.getElementById('video-frame');
-        frame.innerHTML = `<iframe src="${EMBED_BASE}${id}" allowfullscreen></iframe>`;
-        player.style.display = 'block';
-    }
-
-    function closePlayer() {
-        document.getElementById('player-container').style.display = 'none';
-        document.getElementById('video-frame').innerHTML = '';
-    }
-
-    function toggleSettings() {
-        document.getElementById('feed').classList.toggle('none');
-        document.getElementById('settings').classList.toggle('active');
-    }
-
-    function changeTheme(theme) {
-        document.documentElement.setAttribute('data-theme', theme);
-    }
-
-    function loadHome() {
-        document.getElementById('settings').classList.remove('active');
-        fetchVideos();
-    }
-
-    // Старт
-    fetchVideos();
-</script>
+        <div class="url-hint">Управление: ?v=URL&t=SEC&vol=100&play=1</div>
+    </div>
+    <script src="script.js"></script>
 </body>
 </html>
+
+
+
+
+<style>
+body {
+    background: #000;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    font-family: 'Inter', sans-serif;
+}
+
+.player-container {
+    position: relative;
+    width: 90%;
+    max-width: 1000px;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 0 50px rgba(255, 0, 0, 0.2);
+    background: #111;
+}
+
+video { width: 100%; display: block; }
+
+.controls {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 20px;
+    background: linear-gradient(transparent, rgba(0,0,0,0.8));
+    backdrop-filter: blur(10px);
+    transition: opacity 0.3s;
+}
+
+.progress-area {
+    height: 4px;
+    background: rgba(255,255,255,0.2);
+    cursor: pointer;
+    border-radius: 2px;
+    margin-bottom: 15px;
+}
+
+.progress-bar {
+    height: 100%;
+    width: 0%;
+    background: #ff0000;
+    position: relative;
+}
+
+.buttons {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    color: #fff;
+}
+
+.brand { font-weight: bold; letter-spacing: 2px; color: #ff0000; }
+
+.url-hint {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    color: rgba(255,255,255,0.3);
+    font-size: 10px;
+}
+</style>
+ <script>
+const video = document.getElementById('main-video');
+const progressBar = document.querySelector('.progress-bar');
+const playBtn = document.getElementById('play-pause');
+
+// Функция парсинга URL
+function applyUrlSettings() {
+    const params = new URLSearchParams(window.location.search);
+    
+    // 1. Установка видео (v=ссылка)
+    if (params.has('v')) {
+        video.src = params.get('v');
+    } else {
+        // Тестовое видео, если URL пуст
+        video.src = "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
+    }
+
+    // 2. Время старта (t=секунды)
+    if (params.has('t')) {
+        video.currentTime = parseInt(params.get('t'));
+    }
+
+    // 3. Громкость (vol=0-100)
+    if (params.has('vol')) {
+        video.volume = parseInt(params.get('vol')) / 100;
+    }
+
+    // 4. Автоплей (play=1)
+    if (params.get('play') === '1') {
+        video.play().catch(e => console.log("Нужно взаимодействие пользователя для старта"));
+    }
+}
+
+// Обновление прогресс-бара
+video.ontimeupdate = () => {
+    const percentage = (video.currentTime / video.duration) * 100;
+    progressBar.style.width = percentage + "%";
+};
+
+// Переключение Play/Pause
+playBtn.onclick = () => {
+    video.paused ? video.play() : video.pause();
+    playBtn.innerText = video.paused ? "Play" : "Pause";
+};
+
+// Инициализация при загрузке
+window.onload = applyUrlSettings;
+ </script>
