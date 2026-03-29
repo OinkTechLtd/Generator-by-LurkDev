@@ -2,142 +2,140 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Смотрим | YouTube 2026</title>
-    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Платформа (by StreamLiveTV)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #0f0f0f; color: white; font-family: Roboto, Arial, sans-serif; overflow-x: hidden; }
+        .sidebar-item:hover { background-color: #272727; }
+        .video-card:hover .video-title { color: #3ea6ff; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-thumb { background: #717171; border-radius: 4px; }
+        .embed-container { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; background: #000; }
+        .embed-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
+    </style>
 </head>
 <body>
-    <div class="player-container" id="player">
-        <video id="main-video" src=""></video>
+
+    <!-- Шапка (Интерфейс YouTube без лишних кнопок) -->
+    <nav class="fixed top-0 z-50 w-full bg-[#0f0f0f] flex items-center justify-between px-4 py-2">
+        <div class="flex items-center gap-4">
+            <button id="menu-toggle" class="p-2 hover:bg-zinc-800 rounded-full">
+                <svg viewBox="0 0 24 24" class="w-6 h-6 fill-white"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"></path></svg>
+            </button>
+            <div class="text-xl font-bold tracking-tighter flex items-center">
+                <span class="bg-red-600 px-1 rounded mr-1">▶</span> ПЛАТФОРМА
+            </div>
+        </div>
         
-        <div class="controls">
-            <div class="progress-area"><div class="progress-bar"></div></div>
-            <div class="buttons">
-                <button id="play-pause">Play</button>
-                <div class="brand">By Lurk Dev</div>
-                <div class="time">00:00 / 00:00</div>
+        <div class="flex-1 max-w-2xl px-4">
+            <div class="relative flex border border-zinc-800 rounded-full bg-zinc-900 overflow-hidden">
+                <input id="search-input" type="text" placeholder="Введите запрос" class="w-full bg-transparent px-4 py-2 outline-none">
+                <button class="bg-zinc-800 px-5 border-l border-zinc-800 hover:bg-zinc-700">
+                    <svg viewBox="0 0 24 24" class="w-6 h-6 fill-white"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path></svg>
+                </button>
             </div>
         </div>
 
-        <div class="url-hint">Управление: ?v=URL&t=SEC&vol=100&play=1</div>
+        <div class="w-20 lg:w-40 flex justify-end">
+            <!-- Кнопки входа и загрузки удалены согласно ТЗ -->
+        </div>
+    </nav>
+
+    <!-- Основной контент -->
+    <div class="flex pt-14">
+        <!-- Боковая панель -->
+        <aside class="hidden md:block w-64 fixed h-full bg-[#0f0f0f] p-3 space-y-2">
+            <div class="sidebar-item p-2 rounded-lg cursor-pointer">Главная</div>
+            <div class="sidebar-item p-2 rounded-lg cursor-pointer">Shorts</div>
+            <div class="sidebar-item p-2 rounded-lg cursor-pointer">Подписки</div>
+            <hr class="border-zinc-800 my-2">
+            <div class="px-2 text-sm text-zinc-400">Library</div>
+        </aside>
+
+        <!-- Сетка видео -->
+        <main class="w-full md:ml-64 p-6 overflow-y-auto" id="main-content">
+            <div id="video-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                <!-- Карточки подгружаются через JS -->
+            </div>
+            
+            <!-- Плеер (скрыт по умолчанию) -->
+            <div id="player-view" class="hidden w-full max-w-6xl mx-auto">
+                <button onclick="closePlayer()" class="mb-4 text-zinc-400 hover:text-white flex items-center gap-2">
+                    ← Назад к списку
+                </button>
+                <div class="embed-container" id="video-frame-container">
+                    <!-- iframe здесь -->
+                </div>
+                <h1 id="playing-title" class="text-2xl font-bold mt-4"></h1>
+                <p id="playing-desc" class="text-zinc-400 mt-2"></p>
+            </div>
+        </main>
     </div>
-    <script src="script.js"></script>
+
+    <script>
+        const API_URL = 'https://aqeleulwobgamdffkfri.supabase.co/functions/v1/public-channels';
+        // Черный список ID каналов, которые "не достойны"
+        const BANNED_CHANNELS = ['trash_id_1', 'scam_channel_99']; 
+
+        async function fetchVideos() {
+            try {
+                const response = await fetch(API_URL);
+                const data = await response.json();
+                renderVideos(data);
+            } catch (err) {
+                console.error("Ошибка API:", err);
+            }
+        }
+
+        function renderVideos(videos) {
+            const grid = document.getElementById('video-grid');
+            grid.innerHTML = '';
+
+            // Фильтрация "мусора"
+            const filtered = videos.filter(v => !BANNED_CHANNELS.includes(v.id));
+
+            filtered.forEach(video => {
+                const card = document.createElement('div');
+                card.className = 'video-card cursor-pointer space-y-2';
+                card.onclick = () => openPlayer(video.id, video.name, video.description);
+                
+                card.innerHTML = `
+                    <img src="${video.preview_url || 'https://via.placeholder.com/640x360?text=StreamLive'}" class="rounded-xl w-full aspect-video object-cover">
+                    <div class="flex gap-3">
+                        <div class="w-10 h-10 rounded-full bg-zinc-800 shrink-0 border border-zinc-700"></div>
+                        <div>
+                            <h3 class="video-title font-bold leading-tight line-clamp-2 text-sm">${video.name}</h3>
+                            <p class="text-xs text-zinc-400 mt-1">StreamLiveTV • 0 зрителей</p>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function openPlayer(id, title, desc) {
+            document.getElementById('video-grid').classList.add('hidden');
+            document.getElementById('player-view').classList.remove('hidden');
+            
+            // Формат Embed согласно ТЗ: custom lovable app
+            const embedUrl = `https://embesslivestudio.lovable.app/embed/${id}`;
+            document.getElementById('video-frame-container').innerHTML = `
+                <iframe src="${embedUrl}" allowfullscreen></iframe>
+            `;
+            document.getElementById('playing-title').innerText = title;
+            document.getElementById('playing-desc').innerText = desc || 'Описание отсутствует';
+            window.scrollTo(0, 0);
+        }
+
+        function closePlayer() {
+            document.getElementById('video-grid').classList.remove('hidden');
+            document.getElementById('player-view').classList.add('hidden');
+            document.getElementById('video-frame-container').innerHTML = '';
+        }
+
+        // Инициализация
+        fetchVideos();
+    </script>
 </body>
 </html>
-
-
-
-
-<style>
-body {
-    background: #000;
-    margin: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    font-family: 'Inter', sans-serif;
-}
-
-.player-container {
-    position: relative;
-    width: 90%;
-    max-width: 1000px;
-    border-radius: 20px;
-    overflow: hidden;
-    box-shadow: 0 0 50px rgba(255, 0, 0, 0.2);
-    background: #111;
-}
-
-video { width: 100%; display: block; }
-
-.controls {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    padding: 20px;
-    background: linear-gradient(transparent, rgba(0,0,0,0.8));
-    backdrop-filter: blur(10px);
-    transition: opacity 0.3s;
-}
-
-.progress-area {
-    height: 4px;
-    background: rgba(255,255,255,0.2);
-    cursor: pointer;
-    border-radius: 2px;
-    margin-bottom: 15px;
-}
-
-.progress-bar {
-    height: 100%;
-    width: 0%;
-    background: #ff0000;
-    position: relative;
-}
-
-.buttons {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    color: #fff;
-}
-
-.brand { font-weight: bold; letter-spacing: 2px; color: #ff0000; }
-
-.url-hint {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    color: rgba(255,255,255,0.3);
-    font-size: 10px;
-}
-</style>
- <script>
-const video = document.getElementById('main-video');
-const progressBar = document.querySelector('.progress-bar');
-const playBtn = document.getElementById('play-pause');
-
-// Функция парсинга URL
-function applyUrlSettings() {
-    const params = new URLSearchParams(window.location.search);
-    
-    // 1. Установка видео (v=ссылка)
-    if (params.has('v')) {
-        video.src = params.get('v');
-    } else {
-        // Тестовое видео, если URL пуст
-        video.src = "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
-    }
-
-    // 2. Время старта (t=секунды)
-    if (params.has('t')) {
-        video.currentTime = parseInt(params.get('t'));
-    }
-
-    // 3. Громкость (vol=0-100)
-    if (params.has('vol')) {
-        video.volume = parseInt(params.get('vol')) / 100;
-    }
-
-    // 4. Автоплей (play=1)
-    if (params.get('play') === '1') {
-        video.play().catch(e => console.log("Нужно взаимодействие пользователя для старта"));
-    }
-}
-
-// Обновление прогресс-бара
-video.ontimeupdate = () => {
-    const percentage = (video.currentTime / video.duration) * 100;
-    progressBar.style.width = percentage + "%";
-};
-
-// Переключение Play/Pause
-playBtn.onclick = () => {
-    video.paused ? video.play() : video.pause();
-    playBtn.innerText = video.paused ? "Play" : "Pause";
-};
-
-// Инициализация при загрузке
-window.onload = applyUrlSettings;
- </script>
