@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Платформа (by StreamLiveTV)</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #0f0f0f;
+            --text-color: #ffffff;
+            --secondary-bg: #272727;
+            --accent-color: #ff0000;
+        }
+
+        [data-theme="light"] {
+            --bg-color: #ffffff;
+            --text-color: #0f0f0f;
+            --secondary-bg: #f2f2f2;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: background 0.3s;
+        }
+
+        /* Header */
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--bg-color);
+            padding: 0 16px;
+            z-index: 1000;
+        }
+
+        .logo { font-weight: bold; font-size: 20px; color: var(--accent-color); text-decoration: none; }
+
+        /* Feed Grid */
+        #feed {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 16px;
+            padding: 70px 16px 80px 16px;
+        }
+
+        .video-card { cursor: pointer; }
+        .thumbnail { 
+            width: 100%; aspect-ratio: 16/9; 
+            background: var(--secondary-bg); 
+            border-radius: 12px;
+            object-fit: cover;
+        }
+
+        /* Mobile Nav */
+        .mobile-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            height: 60px;
+            background: var(--bg-color);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            border-top: 1px solid var(--secondary-bg);
+            z-index: 1000;
+        }
+
+        .nav-item { text-align: center; font-size: 10px; color: var(--text-color); text-decoration: none; }
+        .nav-item i { font-size: 20px; display: block; }
+
+        /* Player Overlay */
+        #player-container {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 2000;
+        }
+        
+        iframe { width: 100%; height: 100%; border: none; }
+
+        .close-player {
+            position: absolute; top: 10px; right: 10px;
+            color: white; font-size: 30px; cursor: pointer; z-index: 2001;
+        }
+
+        .settings-panel { padding: 20px; display: none; }
+        .active { display: block !important; }
+    </style>
+</head>
+<body>
+
+<header>
+    <a href="#" class="logo">Платформа</a>
+    <div id="user-profile" onclick="toggleSettings()"><i class="fas fa-user-circle fa-2x"></i></div>
+</header>
+
+<div id="feed">
+    <!-- Контент загружается через JS -->
+</div>
+
+<div id="settings" class="settings-panel">
+    <h2>Настройки</h2>
+    <label>Тема оформления:</label>
+    <select onchange="changeTheme(this.value)">
+        <option value="dark">Темная</option>
+        <option value="light">Светлая</option>
+    </select>
+</div>
+
+<nav class="mobile-nav">
+    <a href="#" class="nav-item" onclick="loadHome()"><i class="fas fa-home"></i>Главная</a>
+    <a href="#" class="nav-item"><i class="fas fa-compass"></i>Навигатор</a>
+    <a href="#" class="nav-item"><i class="fas fa-play-circle"></i>Shorts</a>
+    <a href="#" class="nav-item"><i class="fas fa-folder"></i>Библиотека</a>
+</nav>
+
+<div id="player-container">
+    <span class="close-player" onclick="closePlayer()">&times;</span>
+    <div id="video-frame"></div>
+</div>
+
+<script>
+    const API_URL = 'https://aqeleulwobgamdffkfri.supabase.co/functions/v1/public-channels';
+    const EMBED_BASE = 'https://embesslivestudio.lovable.app/embed/'; // Заданный домейн
+    const WHITELIST = ['oinktech', 'twixoff', 'ТВКАНАЛЫ'];
+
+    let userPreferences = JSON.parse(localStorage.getItem('prefs')) || {};
+
+    // Загрузка данных
+    async function fetchVideos() {
+        try {
+            const response = await fetch(API_URL);
+            const data = await response.json();
+            
+            // Фильтрация мусора (Только оригинал)
+            const filtered = data.filter(channel => 
+                WHITELIST.includes(channel.name) || channel.is_verified === true
+            );
+
+            // Сортировка по рекомендациям (упрощенно)
+            filtered.sort((a, b) => (userPreferences[b.category] || 0) - (userPreferences[a.category] || 0));
+
+            renderFeed(filtered);
+        } catch (e) {
+            console.error("Ошибка загрузки:", e);
+        }
+    }
+
+    function renderFeed(channels) {
+        const container = document.getElementById('feed');
+        container.innerHTML = '';
+        channels.forEach(ch => {
+            const card = document.createElement('div');
+            card.className = 'video-card';
+            card.onclick = () => openVideo(ch.id, ch.category);
+            card.innerHTML = `
+                <img class="thumbnail" src="${ch.thumbnail || 'https://via.placeholder.com/300x169'}">
+                <div style="padding:10px 0;">
+                    <strong style="display:block;">${ch.title || 'Прямой эфир'}</strong>
+                    <small style="color:gray;">${ch.name} • Проверено</small>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    function openVideo(id, category) {
+        // Трекинг рекомендаций
+        userPreferences[category] = (userPreferences[category] || 0) + 1;
+        localStorage.setItem('prefs', JSON.stringify(userPreferences));
+
+        const player = document.getElementById('player-container');
+        const frame = document.getElementById('video-frame');
+        frame.innerHTML = `<iframe src="${EMBED_BASE}${id}" allowfullscreen></iframe>`;
+        player.style.display = 'block';
+    }
+
+    function closePlayer() {
+        document.getElementById('player-container').style.display = 'none';
+        document.getElementById('video-frame').innerHTML = '';
+    }
+
+    function toggleSettings() {
+        document.getElementById('feed').classList.toggle('none');
+        document.getElementById('settings').classList.toggle('active');
+    }
+
+    function changeTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+    }
+
+    function loadHome() {
+        document.getElementById('settings').classList.remove('active');
+        fetchVideos();
+    }
+
+    // Старт
+    fetchVideos();
+</script>
+</body>
+</html>
