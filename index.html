@@ -245,6 +245,70 @@
             justify-content: center;
         }
 
+
+        /* DOCS */
+        .docs-wrapper {
+            background: var(--bg-card);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .docs-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            background: #11182a;
+        }
+
+        .docs-tab {
+            background: transparent;
+            color: var(--text-dim);
+            border: 1px solid rgba(255,255,255,0.12);
+            padding: 10px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .docs-tab.active,
+        .docs-tab:hover {
+            color: var(--text-main);
+            border-color: var(--accent-neon);
+            box-shadow: 0 0 0 1px rgba(0, 242, 255, 0.25);
+        }
+
+        .docs-content {
+            padding: 30px;
+        }
+
+        .docs-panel {
+            display: none;
+        }
+
+        .docs-panel.active {
+            display: block;
+        }
+
+        .docs-panel h3 {
+            color: var(--accent-neon);
+            margin-bottom: 10px;
+            margin-top: 18px;
+        }
+
+        .docs-panel ul {
+            margin: 8px 0 10px 20px;
+            color: var(--text-dim);
+        }
+
+        .docs-panel p,
+        .docs-panel li {
+            color: var(--text-dim);
+        }
+
         /* RESPONSIVE */
         @media (max-width: 768px) {
             .hero-content h1 { font-size: 3rem; }
@@ -410,7 +474,99 @@
         </div>
     </section>
 
+
+    <!-- Docs Section -->
+    <section id="docs" class="container">
+        <h2>Docs</h2>
+        <div class="docs-wrapper">
+            <div class="docs-tabs" role="tablist" aria-label="Документация форума">
+                <button class="docs-tab active" data-doc="terms" role="tab" aria-selected="true">Условия использования</button>
+                <button class="docs-tab" data-doc="privacy" role="tab" aria-selected="false">Политика конфиденциальности</button>
+                <button class="docs-tab" data-doc="cookies" role="tab" aria-selected="false">Cookie-политика</button>
+                <button class="docs-tab" data-doc="rules" role="tab" aria-selected="false">Правила участия</button>
+                <button class="docs-tab" data-doc="contacts" role="tab" aria-selected="false">Контакты и реквизиты</button>
+            </div>
+            <div class="docs-content">
+                <article class="docs-panel active" id="doc-terms" role="tabpanel">
+                    <h3>1. Общие положения</h3>
+                    <p>Настоящие условия регулируют использование сайта Казанского Форума 2026, регистрацию участников и взаимодействие с организаторами. Используя сайт, вы подтверждаете согласие с условиями документации.</p>
+                    <h3>2. Регистрация и данные участника</h3>
+                    <ul>
+                        <li>Вы предоставляете достоверные контактные данные.</li>
+                        <li>Организатор вправе уточнить информацию для подтверждения участия.</li>
+                        <li>Передача приглашения третьим лицам без согласования не допускается.</li>
+                    </ul>
+                    <h3>3. Интеллектуальные права</h3>
+                    <p>Материалы сайта, программа форума, брендовые элементы и визуальный контент принадлежат организатору или правообладателям. Копирование и коммерческое использование без письменного разрешения запрещены.</p>
+                    <h3>4. Ограничение ответственности</h3>
+                    <p>Организатор может обновлять программу, состав спикеров и расписание. Сайт предоставляется «как есть», без гарантий абсолютной непрерывности или отсутствия технических сбоев.</p>
+                </article>
+
+                <article class="docs-panel" id="doc-privacy" role="tabpanel" aria-hidden="true">
+                    <h3>1. Какие данные мы собираем</h3>
+                    <ul>
+                        <li>Имя, email, компания/должность при регистрации.</li>
+                        <li>Технические данные: IP, тип устройства, браузер, время визита.</li>
+                        <li>История взаимодействий с формами и разделами сайта.</li>
+                    </ul>
+                    <h3>2. Для чего используются данные</h3>
+                    <ul>
+                        <li>Оформление участия и отправка организационных уведомлений.</li>
+                        <li>Улучшение сервиса и пользовательского опыта.</li>
+                        <li>Аналитика посещаемости и защита от злоупотреблений.</li>
+                    </ul>
+                    <h3>3. Хранение и защита</h3>
+                    <p>Данные хранятся только в пределах срока, необходимого для целей обработки, и защищаются организационными и техническими мерами. Доступ к данным ограничивается уполномоченными сотрудниками и подрядчиками.</p>
+                    <h3>4. Права пользователя</h3>
+                    <p>Вы можете запросить доступ, уточнение, удаление или ограничение обработки ваших данных, а также отозвать согласие через контактный email организатора.</p>
+                </article>
+
+                <article class="docs-panel" id="doc-cookies" role="tabpanel" aria-hidden="true">
+                    <h3>1. Что такое cookie</h3>
+                    <p>Cookie — небольшие файлы, которые помогают запоминать настройки, анализировать поведение пользователей и обеспечивать корректную работу сервиса.</p>
+                    <h3>2. Категории cookie</h3>
+                    <ul>
+                        <li><strong>Обязательные:</strong> базовая функциональность сайта.</li>
+                        <li><strong>Аналитические:</strong> статистика посещений и улучшение интерфейса.</li>
+                        <li><strong>Функциональные:</strong> сохранение пользовательских предпочтений.</li>
+                    </ul>
+                    <h3>3. Управление cookie</h3>
+                    <p>Вы можете отключить cookie в настройках браузера. Это может ограничить доступность части функций (например, сохранение состояния форм).</p>
+                </article>
+
+                <article class="docs-panel" id="doc-rules" role="tabpanel" aria-hidden="true">
+                    <h3>1. Поведение на площадке</h3>
+                    <ul>
+                        <li>Соблюдайте нормы деловой этики и уважительного общения.</li>
+                        <li>Запрещены дискриминация, агрессия и навязчивый маркетинг.</li>
+                        <li>В фото- и видеозонах участник может попасть в кадр официальной съемки.</li>
+                    </ul>
+                    <h3>2. Допуск и безопасность</h3>
+                    <p>Организатор оставляет за собой право ограничить доступ на мероприятие при нарушении правил площадки, требований безопасности или законодательства.</p>
+                    <h3>3. Изменения программы</h3>
+                    <p>Расписание, спикеры и форматы сессий могут меняться. Актуальные изменения публикуются на этой странице в разделе Docs.</p>
+                </article>
+
+                <article class="docs-panel" id="doc-contacts" role="tabpanel" aria-hidden="true">
+                    <h3>Организатор</h3>
+                    <p>АНО «Казанский Технологический Форум»</p>
+                    <h3>Контакты</h3>
+                    <ul>
+                        <li>Email: hello@kazanforum.tech</li>
+                        <li>Партнерства: partners@kazanforum.tech</li>
+                        <li>Для СМИ: press@kazanforum.tech</li>
+                    </ul>
+                    <h3>Срок ответа</h3>
+                    <p>Обычно отвечаем в течение 1–2 рабочих дней. Для юридических запросов по персональным данным — до 10 рабочих дней.</p>
+                    <h3>Дата обновления документов</h3>
+                    <p>Последнее обновление: 5 апреля 2026 года.</p>
+                </article>
+            </div>
+        </div>
+    </section>
+
     <!-- Footer -->
+
     <footer>
         <div class="container">
             <p>Казань, ул. Спартаковская, 2 (ИТ-Парк им. Б. Рамеева)</p>
@@ -418,6 +574,7 @@
                 <a href="#">Telegram</a>
                 <a href="#">VKontakte</a>
                 <a href="#">Email</a>
+                <a href="#docs">Docs</a>
             </div>
             <p style="color: var(--text-dim); font-size: 0.8rem;">&copy; 2026 Казанский Технологический Форум. Все права защищены.</p>
         </div>
@@ -447,6 +604,35 @@
             const target = document.querySelector('#register');
             target.scrollIntoView({ behavior: 'smooth' });
         });
+
+        // Табы раздела docs
+        const docsTabs = document.querySelectorAll('.docs-tab');
+        const docsPanels = document.querySelectorAll('.docs-panel');
+
+        docsTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const targetDoc = tab.dataset.doc;
+
+                docsTabs.forEach(item => {
+                    item.classList.remove('active');
+                    item.setAttribute('aria-selected', 'false');
+                });
+                docsPanels.forEach(panel => {
+                    panel.classList.remove('active');
+                    panel.setAttribute('aria-hidden', 'true');
+                });
+
+                tab.classList.add('active');
+                tab.setAttribute('aria-selected', 'true');
+
+                const nextPanel = document.getElementById(`doc-${targetDoc}`);
+                if (nextPanel) {
+                    nextPanel.classList.add('active');
+                    nextPanel.setAttribute('aria-hidden', 'false');
+                }
+            });
+        });
+
     </script>
 </body>
 </html>
